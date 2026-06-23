@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transaction Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e4e6eb;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: #1a1d27;
+      border: 1px solid #2a2d3a;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #a8b0c0;
+      font-weight: 500;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #8b92a5;
+      margin-bottom: 0.3rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      background: #0f1117;
+      border: 1px solid #2a2d3a;
+      border-radius: 8px;
+      color: #e4e6eb;
+      font-size: 0.95rem;
+      margin-bottom: 0.85rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #5b8def;
+    }
+
+    button {
+      background: #5b8def;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    button:hover { background: #4a7ad4; }
+
+    .result {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .result.show { display: block; }
+
+    .result.success {
+      background: #1a2e1a;
+      border: 1px solid #2d5a2d;
+      color: #8fdf8f;
+    }
+
+    .result.error {
+      background: #2e1a1a;
+      border: 1px solid #5a2d2d;
+      color: #df8f8f;
+    }
+
+    .result.info {
+      background: #1a1e2e;
+      border: 1px solid #2d3a5a;
+      color: #8fafdf;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid #2a2d3a;
+    }
+
+    th {
+      color: #8b92a5;
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .empty-msg {
+      color: #8b92a5;
+      font-size: 0.9rem;
+      margin-top: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Transaction Manager</h1>
+  <div class="container">
+
+    <!-- Section 1: Send Transaction -->
+    <div class="card">
+      <h2>Send Transaction</h2>
+      <label for="tx-user-id">User ID</label>
+      <input id="tx-user-id" type="text" placeholder="e.g. alice" />
+
+      <label for="tx-amount">Amount</label>
+      <input id="tx-amount" type="number" min="0.01" step="0.01" placeholder="0.00" />
+
+      <label for="tx-type">Transaction Type</label>
+      <select id="tx-type">
+        <option value="credit">Credit</option>
+        <option value="debit">Debit</option>
+      </select>
+
+      <label for="tx-id">Transaction ID</label>
+      <input id="tx-id" type="text" />
+
+      <button onclick="sendTransaction()">Submit Transaction</button>
+      <div id="tx-result" class="result"></div>
+    </div>
+
+    <!-- Section 2: User Summary -->
+    <div class="card">
+      <h2>User Summary</h2>
+      <label for="summary-user-id">User ID</label>
+      <input id="summary-user-id" type="text" placeholder="e.g. alice" />
+
+      <button onclick="getSummary()">Get Summary</button>
+      <div id="summary-result" class="result"></div>
+    </div>
+
+    <!-- Section 3: Leaderboard -->
+    <div class="card">
+      <h2>Leaderboard</h2>
+      <button onclick="refreshLeaderboard()">Refresh Leaderboard</button>
+      <div id="leaderboard-container"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // Local dev uses port 3001; production uses Render backend (update URL after deploy).
+    const BASE_URL = (() => {
+      const host = window.location.hostname;
+      if (host === "localhost" || host === "127.0.0.1" || host === "") {
+        return "http://localhost:3001";
+      }
+      return "https://transaction-api.onrender.com";
+    })();
+
+    // Auto-generate a UUID for transaction ID on load
+    document.getElementById("tx-id").value = crypto.randomUUID();
+
+    function showResult(el, html, type) {
+      el.className = `result show ${type}`;
+      el.innerHTML = html;
+    }
+
+    async function sendTransaction() {
+      const el = document.getElementById("tx-result");
+      const user_id = document.getElementById("tx-user-id").value.trim();
+      const amount = parseFloat(document.getElementById("tx-amount").value);
+      const type = document.getElementById("tx-type").value;
+      const transaction_id = document.getElementById("tx-id").value.trim();
+
+      if (!user_id || !transaction_id || isNaN(amount) || amount <= 0) {
+        showResult(el, "Please fill in all fields with valid values.", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BASE_URL}/transaction`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id, amount, type, transaction_id }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showResult(el, data.detail || "Transaction failed.", "error");
+          return;
+        }
+
+        showResult(
+          el,
+          `<strong>${data.message}</strong><br>Balance: ${data.balance.toFixed(2)}`,
+          "success"
+        );
+        // Generate a fresh transaction ID for the next submission
+        document.getElementById("tx-id").value = crypto.randomUUID();
+      } catch {
+        showResult(el, "Could not reach the server. Is the backend running?", "error");
+      }
+    }
+
+    async function getSummary() {
+      const el = document.getElementById("summary-result");
+      const user_id = document.getElementById("summary-user-id").value.trim();
+
+      if (!user_id) {
+        showResult(el, "Please enter a User ID.", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BASE_URL}/summary/${encodeURIComponent(user_id)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          showResult(el, data.detail || "User not found.", "error");
+          return;
+        }
+
+        showResult(
+          el,
+          `Balance: <strong>${data.balance.toFixed(2)}</strong><br>
+           Total Credited: ${data.total_credited.toFixed(2)}<br>
+           Total Debited: ${data.total_debited.toFixed(2)}<br>
+           Transactions: ${data.transaction_count}<br>
+           Account Age: ${data.account_age_days} day(s)`,
+          "info"
+        );
+      } catch {
+        showResult(el, "Could not reach the server. Is the backend running?", "error");
+      }
+    }
+
+    async function refreshLeaderboard() {
+      const container = document.getElementById("leaderboard-container");
+
+      try {
+        const res = await fetch(`${BASE_URL}/ranking`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          container.innerHTML = `<div class="empty-msg">${data.detail || "Failed to load."}</div>`;
+          return;
+        }
+
+        if (!data.length) {
+          container.innerHTML = `<div class="empty-msg">No users yet. Send a transaction to get started.</div>`;
+          return;
+        }
+
+        const rows = data.map(
+          (u) => `<tr>
+            <td>${u.rank}</td>
+            <td>${u.user_id}</td>
+            <td>${u.score.toFixed(4)}</td>
+            <td>${u.balance.toFixed(2)}</td>
+            <td>${u.transaction_count}</td>
+          </tr>`
+        ).join("");
+
+        container.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>User ID</th>
+                <th>Score</th>
+                <th>Balance</th>
+                <th>Transactions</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      } catch {
+        container.innerHTML = `<div class="empty-msg">Could not reach the server. Is the backend running?</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
