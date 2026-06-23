@@ -2,16 +2,9 @@
 
 Follow these steps to get live URLs for your submission.
 
-## Step 1 — Push to GitHub
+## Step 1 — Push to GitHub ✅ Done
 
-1. Create a new repo at https://github.com/new (name it e.g. `transaction-manager`, **no** README/license).
-2. Run these commands (replace `YOUR_USERNAME`):
-
-```bash
-cd c:\Users\ktcha\Downloads\ass1
-git remote add origin https://github.com/YOUR_USERNAME/transaction-manager.git
-git push -u origin main
-```
+Repo: https://github.com/Chandangowdakt/transaction-manager
 
 ## Step 2 — Deploy Backend on Render (free)
 
@@ -43,7 +36,7 @@ git push
 2. **Source**: GitHub Actions
 3. Push to `main` triggers `.github/workflows/pages.yml`
 4. After ~1 min, your live frontend is at:
-   `https://YOUR_USERNAME.github.io/transaction-manager/`
+   `https://chandangowdakt.github.io/transaction-manager/`
 
 ## Step 5 — Test Live
 
@@ -58,7 +51,7 @@ Use [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md) — 3–5 min walkthrough of the **live**
 
 ## Step 7 — Submit
 
-- GitHub repo link: `https://github.com/YOUR_USERNAME/transaction-manager`
+- GitHub repo link: `https://github.com/Chandangowdakt/transaction-manager`
 - Or zip: `ass1-submission.zip` (in your Downloads folder)
 - Video link (YouTube unlisted / Drive / Loom)
 

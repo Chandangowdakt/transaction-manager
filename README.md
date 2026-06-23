@@ -6,8 +6,9 @@ A transaction management system with a user leaderboard. Users can send credit/d
 
 | Component | URL |
 |-----------|-----|
-| **Frontend** | _Update after GitHub Pages deploy — Settings → Pages → Source: GitHub Actions_ |
-| **Backend API** | https://transaction-api.onrender.com |
+| **Repository** | https://github.com/Chandangowdakt/transaction-manager |
+| **Frontend** | https://chandangowdakt.github.io/transaction-manager/ _(enable GitHub Pages — see DEPLOY.md)_ |
+| **Backend API** | https://transaction-api.onrender.com _(deploy on Render — see DEPLOY.md)_ |
 | **API Docs** | https://transaction-api.onrender.com/docs |
 
 > **Note:** Render free tier sleeps after ~15 min of inactivity. The first request may take 30–60 seconds to wake up.
