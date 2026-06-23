@@ -1,5 +1,4 @@
-# Render Blueprint — deploy backend from GitHub repo root.
-# Dashboard: New > Blueprint > connect this repo.
+# Render Blueprint — backend API + static frontend
 services:
   - type: web
     name: transaction-api
@@ -9,3 +8,9 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /docs
+
+  - type: web
+    name: transaction-frontend
+    runtime: static
+    plan: free
+    staticPublishPath: frontend

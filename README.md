@@ -7,7 +7,7 @@ A transaction management system with a user leaderboard. Users can send credit/d
 | Component | URL |
 |-----------|-----|
 | **Repository** | https://github.com/Chandangowdakt/transaction-manager |
-| **Frontend** | https://chandangowdakt.github.io/transaction-manager/ _(enable GitHub Pages — see below)_ |
+| **Frontend** | https://transaction-frontend.onrender.com _(deploy via Render — see below)_ |
 | **Backend API** | https://transaction-api-04sb.onrender.com |
 | **API Docs** | https://transaction-api-04sb.onrender.com/docs |
 
@@ -16,17 +16,16 @@ A transaction management system with a user leaderboard. Users can send credit/d
 ## Project Structure
 
 ```
-project/
 ├── backend/
 │   ├── main.py            # FastAPI routes
 │   ├── store.py           # In-memory data store
 │   ├── models.py          # Request/response models
 │   ├── ranking.py         # Leaderboard score calculation
-│   └── requirements.txt   # Python dependencies
+│   └── requirements.txt
 ├── frontend/
 │   └── index.html         # Single-page UI (HTML + CSS + JS)
-├── render.yaml            # One-click backend deploy on Render
-├── .github/workflows/     # GitHub Pages auto-deploy for frontend
+├── render.yaml            # Deploy backend + frontend on Render
+├── VIDEO_SCRIPT.md        # Outline for 3–5 min demo video
 └── README.md
 ```
 
@@ -40,32 +39,29 @@ pip install -r requirements.txt
 python -m uvicorn main:app --reload --port 3001
 ```
 
-API available at `http://localhost:3001`. Interactive docs at `http://localhost:3001/docs`.
-
-> On Windows, if `uvicorn` is not on PATH, always use `python -m uvicorn`.
-
 ### Frontend
 
-Open `frontend/index.html` in a browser while the backend is running. The frontend auto-detects localhost and points to port `3001`.
+Open `frontend/index.html` in a browser while the backend is running.
 
-## Deploying Live
+## Deploy on Render
 
-### Backend (Render — free)
+### Backend (already live)
 
-1. Push this repo to GitHub.
-2. Go to [render.com](https://render.com) → **New** → **Blueprint**.
-3. Connect the repo — Render reads `render.yaml` automatically.
-4. Deploy. Your API will be at `https://transaction-api.onrender.com` (or the name you choose).
-5. Update the production URL in `frontend/index.html` if your service name differs.
+Your API is at **https://transaction-api-04sb.onrender.com**
 
-### Frontend (GitHub Pages — free)
+### Frontend (do this now)
 
-1. Push to GitHub (`main` branch).
-2. Repo **Settings** → **Pages** → **Source**: select **GitHub Actions**.
-3. The workflow in `.github/workflows/pages.yml` deploys `frontend/` on every push.
-4. Your live URL will be `https://<username>.github.io/<repo-name>/`.
+1. Go to [render.com](https://render.com) dashboard
+2. Click **New +** → **Static Site**
+3. Connect repo: `Chandangowdakt/transaction-manager`
+4. Settings:
+   - **Name:** `transaction-frontend`
+   - **Branch:** `main`
+   - **Publish directory:** `frontend`
+5. Click **Create Static Site**
+6. Wait ~1 min, then open your live URL (e.g. `https://transaction-frontend.onrender.com`)
 
-CORS is enabled on the backend (`allow_origins=["*"]`) so the deployed frontend can call the API.
+CORS is enabled on the backend so the frontend can call the API from any origin.
 
 ## API Endpoints
 
@@ -98,31 +94,28 @@ Users are sorted by final score descending; rank 1 is highest.
 
 ## Duplicate Request Prevention (Idempotency)
 
-Every transaction includes a client-generated `transaction_id`. If the server has already processed that ID, it returns the cached response without changing the balance. This prevents double-charging on network retries. The cache is checked both before and inside the per-user lock to handle concurrent duplicates safely.
+Every transaction includes a client-generated `transaction_id`. If the server has already processed that ID, it returns the cached response without changing the balance. This prevents double-charging on network retries.
 
 ## Concurrency & Abuse Prevention
 
-- **Per-user asyncio Lock** — serializes concurrent requests for the same `user_id` so balance updates stay consistent.
-- **Idempotency cache** — duplicate `transaction_id` values are never processed twice.
-- **Rate limiting** — max 5 successful (non-duplicate) transactions per user per rolling 60-second window.
+- **Per-user asyncio Lock** — serializes concurrent requests for the same `user_id`
+- **Idempotency cache** — duplicate `transaction_id` values are never processed twice
+- **Rate limiting** — max 5 transactions per user per rolling 60-second window
 
 ## Assumptions & Limitations
 
-- **In-memory storage** — data resets when the server restarts (Render redeploys wipe state).
-- **No authentication** — any client can transact for any `user_id`.
-- **Auto-created profiles** — first transaction for a new `user_id` creates a zero-balance account.
-- **Summary requires existing user** — `GET /summary` returns 404 for unknown users.
-- **Render cold starts** — free tier sleeps; first request after idle may be slow.
+- **In-memory storage** — data resets when the server restarts
+- **No authentication** — any client can transact for any `user_id`
+- **Auto-created profiles** — first transaction for a new `user_id` creates a zero-balance account
+- **Render cold starts** — free tier sleeps; first request after idle may be slow
 
 ## Video Walkthrough
 
-See [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md) for a 3–5 minute recording outline covering architecture, APIs, concurrency, ranking fairness, and trade-offs.
+See [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md) for a 3–5 minute recording outline.
 
-## Submission Checklist
+## Submission
 
-- [x] Source code (backend + frontend)
-- [x] README (run, APIs, ranking, idempotency)
-- [ ] Live deployed frontend URL (GitHub Pages)
-- [ ] Live deployed backend URL (Render)
-- [ ] 3–5 min screen recording (use VIDEO_SCRIPT.md)
-- [ ] GitHub repo link or zip file
+- **Repo:** https://github.com/Chandangowdakt/transaction-manager
+- **Live frontend:** _(your Render static site URL)_
+- **Live backend:** https://transaction-api-04sb.onrender.com
+- **Video:** _(your recording link)_
