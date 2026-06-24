@@ -7,7 +7,7 @@ A transaction management system with a user leaderboard. Users can send credit/d
 | Component | URL |
 |-----------|-----|
 | **Repository** | https://github.com/Chandangowdakt/transaction-manager |
-| **Frontend** | https://transaction-frontend.onrender.com _(deploy via Render — see below)_ |
+| **Frontend** | https://transaction-frontend.onrender.com |
 | **Backend API** | https://transaction-api-04sb.onrender.com |
 | **API Docs** | https://transaction-api-04sb.onrender.com/docs |
 
@@ -24,8 +24,6 @@ A transaction management system with a user leaderboard. Users can send credit/d
 │   └── requirements.txt
 ├── frontend/
 │   └── index.html         # Single-page UI (HTML + CSS + JS)
-├── render.yaml            # Deploy backend + frontend on Render
-├── VIDEO_SCRIPT.md        # Outline for 3–5 min demo video
 └── README.md
 ```
 
@@ -42,26 +40,6 @@ python -m uvicorn main:app --reload --port 3001
 ### Frontend
 
 Open `frontend/index.html` in a browser while the backend is running.
-
-## Deploy on Render
-
-### Backend (already live)
-
-Your API is at **https://transaction-api-04sb.onrender.com**
-
-### Frontend (do this now)
-
-1. Go to [render.com](https://render.com) dashboard
-2. Click **New +** → **Static Site**
-3. Connect repo: `Chandangowdakt/transaction-manager`
-4. Settings:
-   - **Name:** `transaction-frontend`
-   - **Branch:** `main`
-   - **Publish directory:** `frontend`
-5. Click **Create Static Site**
-6. Wait ~1 min, then open your live URL (e.g. `https://transaction-frontend.onrender.com`)
-
-CORS is enabled on the backend so the frontend can call the API from any origin.
 
 ## API Endpoints
 
@@ -109,13 +87,8 @@ Every transaction includes a client-generated `transaction_id`. If the server ha
 - **Auto-created profiles** — first transaction for a new `user_id` creates a zero-balance account
 - **Render cold starts** — free tier sleeps; first request after idle may be slow
 
-## Video Walkthrough
-
-See [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md) for a 3–5 minute recording outline.
-
 ## Submission
 
 - **Repo:** https://github.com/Chandangowdakt/transaction-manager
-- **Live frontend:** _(your Render static site URL)_
+- **Live frontend:** https://transaction-frontend.onrender.com
 - **Live backend:** https://transaction-api-04sb.onrender.com
-- **Video:** _(your recording link)_
